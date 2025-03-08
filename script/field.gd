@@ -9,12 +9,12 @@ var z_: NDArray = nd.ones(grid_size)
 var multimesh: MultiMesh
 
 #fluid related
-var fixed_dt: float = 0.3
+var fixed_dt: float = 0.05
 var height: NDArray = nd.ones(grid_size)
 var velocity: NDArray = nd.zeros(grid_size)
 var acceleration: NDArray = nd.zeros(grid_size)
 var inner_elements: NDArray
-var c: float = 0.2
+@export var c: float = 0.9
 var s: float = 1
 
 func getInnerElements() -> void:
@@ -23,8 +23,20 @@ func getInnerElements() -> void:
 	inner_elements = full_matrix.get(nd.range(1, -1), nd.range(1, -1))
 	inner_elements = nd.hstack(inner_elements)
 
+func instantiateMultiMesh() -> void:
+	multimesh = MultiMesh.new()
+	multimesh.transform_format = MultiMesh.TRANSFORM_3D
+	multimesh.use_custom_data = true
+	var target_mesh: Mesh = meshInstance.mesh
+	multimesh.mesh = target_mesh
+	multimesh.instance_count = grid_size
+	for i in range(grid_size):
+		var transform_ = Transform3D()
+		transform_.origin = Vector3(0 ,0, 0)
+		multimesh.set_instance_transform(i, transform_)
+	multimeshInstance.multimesh = multimesh
+
 func alignFluids() -> void:
-	multimesh = multimeshInstance.multimesh	
 	#x = i / numz
 	var prog: NDArray = nd.arange(0, 99, 100)
 	x_.assign_divide(prog, numz)
@@ -56,8 +68,20 @@ func adjustHeight(dt: float) -> void:
 	velocity.assign_add(velocity, nd.multiply(acceleration, dt))
 	height.assign_add(height, nd.multiply(velocity, dt))
 
+func adjustMeshHeight() -> void:
+	var h: float = 0.0
+	var data: Color = Color(0, 0, 0, 0)
+	for i in range(grid_size):
+		h = height.get_float(i)
+		data = Color(h, h, h, 1.0)
+		multimesh.set_instance_custom_data(i, data)
+
 func _ready() -> void:
+	instantiateMultiMesh()
 	getInnerElements()
 	alignFluids()
+	height.set(0.4, 54)
+
 func _process(delta: float) -> void:
 	adjustHeight(fixed_dt)
+	adjustMeshHeight()
