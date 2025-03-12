@@ -2,6 +2,7 @@ shader_type spatial;
 //uniform sampler2D refractionTexture : source_color;
 uniform sampler2D heightTexture;
 uniform sampler2D normalmap;
+uniform int numxz;
 //
 //varying vec3 ndc;
 varying vec2 tex_coords;
@@ -11,14 +12,14 @@ void vertex() {
 	//ndc = clip_space.xyz / clip_space.w;
 	tex_coords = (VERTEX.xz + 10.0) + 20.0;
 	vec4 vertex = MODEL_MATRIX * vec4(VERTEX, 1.0);
-    int x = int(floor(abs(vertex.x) + 5.0)); // Scale based on plane size
-    int z = int(floor(abs(vertex.z) + 5.0));
+	int z = int((vertex.z + 5.0) / 10.0 * float(numxz - 1));// Scale based on plane size
+    int x = int((vertex.x + 5.0) / 10.0 * float(numxz - 1));
 
     // Ensure indices are within bounds
-    x = clamp(x, 0, 10 - 1);
-    z = clamp(z, 0, 10 - 1);
+    x = clamp(x, 0, numxz - 1);
+    z = clamp(z, 0, numxz - 1);
     // Convert 2D grid index into 1D texture index
-    int index = z * 10 + x;
+    int index = z * numxz + x;
 
     // Sample height from the texture
     vec4 data = texelFetch(heightTexture, ivec2(index, 0), 0);
