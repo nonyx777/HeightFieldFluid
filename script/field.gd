@@ -1,19 +1,20 @@
 extends Node3D
 @onready var waterBody: MeshInstance3D = $Water
-#@onready var subViewport: SubViewport = $"../SubViewport"
+@onready var mainCamera: Camera3D = $"../Camera3D"
+@onready var main_viewport = get_viewport()
 
-var numz: int = 10
-var numx: int = 10
-var grid_size: int = numz * numx
+@export var numz: int = 32
+@export var numx: int = 32
+@export var grid_size: int = numz * numx
 var x_: NDArray = nd.ones(grid_size)
 var z_: NDArray = nd.ones(grid_size)
 var mesh: Mesh
 var material: Material
 var refractionTexture: Texture
-var vertices: PackedVector3Array
-var waterArray
 var heightTexture: Texture
 var image: Image
+var sub_viewport: SubViewport
+var count: int = 0
 
 #fluid related
 var fixed_dt: float = 0.05
@@ -23,9 +24,9 @@ var acceleration: NDArray = nd.zeros(grid_size)
 var inner_elements: NDArray
 @export var c: float = 0.9
 var s: float = 1
-
+#
 func getInnerElements() -> void:
-	var full_matrix: NDArray = nd.linspace(0, 99, 100)
+	var full_matrix: NDArray = nd.linspace(0, grid_size - 1, grid_size)
 	full_matrix = nd.reshape(full_matrix, [numx, numz])
 	inner_elements = full_matrix.get(nd.range(1, -1), nd.range(1, -1))
 	inner_elements = nd.hstack(inner_elements)
@@ -44,34 +45,38 @@ func adjustHeight(dt: float) -> void:
 		icenter = height.get_float(j)
 		iup = height.get_float(j+1)
 		idown = height.get_float(j-1)
-		iright = height.get_float(j+10)
-		ileft = height.get_float(j-10)
+		iright = height.get_float(j+numz) # Or it can be numx
+		ileft = height.get_float(j-numz) # As long as they're equal
 		acceleration.set(((c*c)/(s*s)) * (iup + idown + iright + ileft - 4.0 * icenter), j)
 	velocity.assign_add(velocity, nd.multiply(acceleration, dt))
 	height.assign_add(height, nd.multiply(velocity, dt))
 
 func adjustMeshHeight() -> void:
+	var value: Color
 	for i in range(grid_size):
-		var value = Color(height.get_float(i), 0, 0, 1)
+		value = Color(height.get_float(i), 0, 0, 1)
 		image.set_pixel(i, 0, value)
 	heightTexture = ImageTexture.create_from_image(image)
 	material.set_shader_parameter("heightTexture", heightTexture)
 
 func _ready() -> void:
-	#height.assign_multiply(height, 2)
-	getInnerElements()
-	height.set(0.4, 54)
-	height.set(0.4, 22)
-	height.set(0.4, 83)
-	
 	mesh = waterBody.mesh
 	material = mesh.surface_get_material(0)
-	#refractionTexture = subViewport.get_texture()
-	#material.set_shader_parameter("refractionTexture", refractionTexture)
-	
-	waterArray = waterBody.mesh.surface_get_arrays(0)
-	vertices = waterArray[ArrayMesh.ARRAY_VERTEX]
+	material.set_shader_parameter("numxz", numz);
+	getInnerElements()
+	height.assign_multiply(height, 0)
+	height.set(0.4, 554)
+	height.set(0.2, 645)
+	height.set(2, 823)
 	image = Image.create(grid_size, 1, false, Image.FORMAT_RGBAF)
+	
+	#RenderingServer.viewport_set_update_mode(main_viewport.get_viewport_rid(), RenderingServer.VIEWPORT_UPDATE_ONCE)
+	#mainCamera.cull_mask = 1 << 0
+	#await RenderingServer.frame_post_draw
+	#refractionTexture = main_viewport.get_texture()
+	#material.set_shader_parameter("refractionTexture", refractionTexture)
+	#mainCamera.cull_mask = 0xFFFFF
+	#RenderingServer.viewport_set_update_mode(main_viewport.get_viewport_rid(), RenderingServer.VIEWPORT_UPDATE_ALWAYS)
 
 func _process(delta: float) -> void:
 	adjustHeight(fixed_dt)
