@@ -69,14 +69,6 @@ func _ready() -> void:
 	height.set(0.2, 645)
 	height.set(2, 823)
 	image = Image.create(grid_size, 1, false, Image.FORMAT_RGBAF)
-	
-	#RenderingServer.viewport_set_update_mode(main_viewport.get_viewport_rid(), RenderingServer.VIEWPORT_UPDATE_ONCE)
-	#mainCamera.cull_mask = 1 << 0
-	#await RenderingServer.frame_post_draw
-	#refractionTexture = main_viewport.get_texture()
-	#material.set_shader_parameter("refractionTexture", refractionTexture)
-	#mainCamera.cull_mask = 0xFFFFF
-	#RenderingServer.viewport_set_update_mode(main_viewport.get_viewport_rid(), RenderingServer.VIEWPORT_UPDATE_ALWAYS)
 
 func _process(delta: float) -> void:
 	adjustHeight(fixed_dt)
