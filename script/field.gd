@@ -22,9 +22,9 @@ var height: NDArray = nd.ones(grid_size)
 var velocity: NDArray = nd.zeros(grid_size)
 var acceleration: NDArray = nd.zeros(grid_size)
 var inner_elements: NDArray
-@export var c: float = 0.9
-var s: float = 1
-#
+@export var c: float = 0.1
+@export var s: float = 0.3
+
 func getInnerElements() -> void:
 	var full_matrix: NDArray = nd.linspace(0, grid_size - 1, grid_size)
 	full_matrix = nd.reshape(full_matrix, [numx, numz])
@@ -69,6 +69,8 @@ func _ready() -> void:
 	height.set(0.2, 645)
 	height.set(2, 823)
 	image = Image.create(grid_size, 1, false, Image.FORMAT_RGBAF)
+	s = waterBody.mesh.get_aabb().size[0] / numz # Make sure that width and depth are equal, and also numx and numz are equal as well
+	print(s)
 
 func _process(delta: float) -> void:
 	adjustHeight(fixed_dt)
