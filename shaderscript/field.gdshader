@@ -6,6 +6,8 @@ uniform int numxz;
 
 varying vec2 tex_coords;
 
+const vec3 water_color = vec3(0.0, 0.5, 0.7);
+
 void vertex() {
 	tex_coords = (VERTEX.xz + 10.0) + 20.0;
 	vec4 vertex = MODEL_MATRIX * vec4(VERTEX, 1.0);
@@ -25,6 +27,6 @@ void vertex() {
 	VERTEX.y = height;
 }
 void fragment(){
-	ALBEDO = texture(refractionTexture, SCREEN_UV).rgb;
+	ALBEDO = texture(refractionTexture, SCREEN_UV).rgb * water_color;
 	//NORMAL = texture(normalmap, tex_coords).xyz;
 }
