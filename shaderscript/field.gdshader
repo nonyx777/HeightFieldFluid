@@ -6,6 +6,7 @@ uniform int numxz;
 varying vec2 tex_coords;
 
 const vec3 water_color = vec3(0.0, 0.5, 0.7);
+const float strength = 1.0;
 
 void vertex() {
 	tex_coords = (VERTEX.xz + 10.0) + 20.0;
@@ -34,5 +35,10 @@ void vertex() {
 	VERTEX.y = h_center;
 }
 void fragment(){
-	ALBEDO = texture(refractionTexture, SCREEN_UV).rgb * water_color;
+	vec2 offset = SCREEN_UV;
+	float xNorm = NORMAL.x;
+	float yNorm = NORMAL.y;
+	offset.x += NORMAL.z * xNorm * strength * 0.01;
+	offset.y += NORMAL.z * yNorm * strength * -0.01;
+	ALBEDO = texture(refractionTexture, offset).rgb * water_color;
 }
