@@ -1,7 +1,7 @@
 extends Node3D
 @onready var waterBody: MeshInstance3D = $Water
 @onready var mainCamera: Camera3D = $"../Camera3D"
-@onready var ball: MeshInstance3D = $Sphere1
+@onready var ball1: MeshInstance3D = $Sphere1
 
 @export var numz: int = 32
 @export var numx: int = 32
@@ -16,20 +16,20 @@ var image: Image
 var sub_viewport: SubViewport
 var count: int = 0
 var time: float = 0.0
-var ball_radius: float = 0.0
+var ball1_radius: float = 0.0
 var oscillate: float = 0.0
 
 #fluid related
-var fixed_dt: float = 0.05
+var fixed_dt: float = 0.09
 var height: NDArray = nd.zeros(grid_size)
 var velocity: NDArray = nd.zeros(grid_size)
 var acceleration: NDArray = nd.zeros(grid_size)
 var bcurr: NDArray = nd.zeros(grid_size)
 var bprev: NDArray
 var inner_elements: NDArray
-@export var c: float = 0.9
-@export var s: float = 1.0
-@export var alpha: float = 0.25
+@export var c: float = 0.0
+@export var s: float = 0.0
+@export var alpha: float = 0.2
 @export var drag: float = 0.1
 
 func getInnerElements() -> void:
@@ -69,41 +69,40 @@ func adjustMeshHeight() -> void:
 func ballOccupation() -> void:
 	bprev = bcurr.copy()
 	bcurr.assign_multiply(bcurr, 0.0)
-	var x: int = int((ball.position.x + 5.0) / 10.0 * float(numx - 1))
-	var z: int = int((ball.position.z + 5.0) / 10.0 * float(numz - 1))
-	x = clamp(x, 0, numx - 1)
-	z = clamp(z, 0, numz - 1)
-	var index: int = z * numz + x
+	# getting index of ball 1's position
+	var x1: int = int((ball1.position.x + 5.0) / 10.0 * float(numx - 1))
+	var z1: int = int((ball1.position.z + 5.0) / 10.0 * float(numz - 1))
+	x1 = clamp(x1, 0, numx - 1)
+	z1 = clamp(z1, 0, numz - 1)
+	var index1: int = z1 * numz + x1
 	
-	bcurr.set(min(0.0, ball.position.y + ball_radius) - max(-1.5, ball.position.y - ball_radius), index)
-	bcurr.set(min(0.0, ball.position.y + ball_radius) - max(-1.5, ball.position.y - ball_radius), index+1)
-	bcurr.set(min(0.0, ball.position.y + ball_radius) - max(-1.5, ball.position.y - ball_radius), index-1)
-	bcurr.set(min(0.0, ball.position.y + ball_radius) - max(-1.5, ball.position.y - ball_radius), index+numz)
-	bcurr.set(min(0.0, ball.position.y + ball_radius) - max(-1.5, ball.position.y - ball_radius), index-numz)
+	# How much of ball 1 is inside the water
+	bcurr.set(min(0.0, ball1.position.y + ball1_radius) - max(-2.0, ball1.position.y - ball1_radius), index1)
+	bcurr.set(min(0.0, ball1.position.y + ball1_radius) - max(-2.0, ball1.position.y - ball1_radius), index1+1)
+	bcurr.set(min(0.0, ball1.position.y + ball1_radius) - max(-2.0, ball1.position.y - ball1_radius), index1-1)
+	bcurr.set(min(0.0, ball1.position.y + ball1_radius) - max(-2.0, ball1.position.y - ball1_radius), index1+numz)
+	bcurr.set(min(0.0, ball1.position.y + ball1_radius) - max(-2.0, ball1.position.y - ball1_radius), index1-numz)
 
-func moveBall(delta: float) -> void:
+func moveBalls(delta: float) -> void:
 	# Convert to radians at point of use
 	var angle = deg_to_rad(oscillate)
 	
 	# Increase multipliers for visible movement
-	ball.position.x += cos(angle) * 2.0 * delta
-	ball.position.z += sin(angle) * 2.0 * delta
-	ball.position.y += sin(angle) * 2.0 * delta
+	ball1.position.x += cos(angle * 2.0) * 4.0 * delta
+	ball1.position.z += sin(angle * 2.0) * 4.0 * delta
 
 func _ready() -> void:
 	mesh = waterBody.mesh
 	material = mesh.surface_get_material(0)
 	material.set_shader_parameter("numxz", numz);
 	getInnerElements()
-	#height.set(0.4, 554)
-	#height.set(0.2, 645)
-	#height.set(2, 823)
 	image = Image.create(grid_size, 1, false, Image.FORMAT_RGBAF)
-	#s = waterBody.mesh.get_aabb().size[0] / numz # Make sure that width and depth are equal, and also numx and numz are equal as well
-	ball_radius = ball.mesh.radius
+	s = waterBody.mesh.get_aabb().size[0] / numz # Make sure that width and depth are equal, and also numx and numz are equal as well
+	c = s
+	ball1_radius = ball1.mesh.radius
 
 func _process(delta: float) -> void:
-	moveBall(delta)
+	moveBalls(delta)
 	ballOccupation()
 	adjustHeight(fixed_dt)
 	adjustMeshHeight()
