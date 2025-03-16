@@ -14,3 +14,23 @@ config/name="Height Field Fluid"
 run/main_scene="res://scene/main.tscn"
 config/features=PackedStringArray("4.3", "Forward Plus")
 config/icon="res://icon.svg"
+
+[audio]
+
+general/default_playback_type=1
+general/2d_panning_strength=0.0
+general/3d_panning_strength=0.0
+driver/driver=""
+driver/output_latency=1
+driver/output_latency.web=1
+driver/mix_rate=11025
+
+[display]
+
+window/size/viewport_width=960
+window/size/viewport_height=540
+window/vsync/vsync_mode=0
+
+[rendering]
+
+textures/default_filters/anisotropic_filtering_level=0

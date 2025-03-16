@@ -1,66 +1,89 @@
-[gd_scene load_steps=12 format=3 uid="uid://cljvp7urel7pg"]
+[gd_scene load_steps=11 format=3 uid="uid://cljvp7urel7pg"]
 
 [ext_resource type="Script" path="res://script/field.gd" id="1_xhoof"]
 [ext_resource type="Shader" path="res://shaderscript/field.gdshader" id="2_e674j"]
 
-[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_g3w5x"]
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_01van"]
 sky_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
 ground_horizon_color = Color(0.64625, 0.65575, 0.67075, 1)
 
-[sub_resource type="Sky" id="Sky_ew62x"]
-sky_material = SubResource("ProceduralSkyMaterial_g3w5x")
+[sub_resource type="Sky" id="Sky_gc06b"]
+sky_material = SubResource("ProceduralSkyMaterial_01van")
 
-[sub_resource type="Environment" id="Environment_oiien"]
+[sub_resource type="Environment" id="Environment_0qoor"]
 background_mode = 2
-sky = SubResource("Sky_ew62x")
-
-[sub_resource type="FastNoiseLite" id="FastNoiseLite_2vf46"]
-noise_type = 0
-frequency = 0.0166
-
-[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_5mvhb"]
-as_normal_map = true
-bump_strength = 32.0
-noise = SubResource("FastNoiseLite_2vf46")
+sky = SubResource("Sky_gc06b")
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_hplbe"]
 render_priority = 0
 shader = ExtResource("2_e674j")
-shader_parameter/normalmap = SubResource("NoiseTexture2D_5mvhb")
+shader_parameter/numxz = null
 
 [sub_resource type="PlaneMesh" id="PlaneMesh_db3nh"]
 material = SubResource("ShaderMaterial_hplbe")
 size = Vector2(10, 10)
-subdivide_width = 8
-subdivide_depth = 8
+subdivide_width = 32
+subdivide_depth = 32
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_onx4x"]
-albedo_color = Color(0.254902, 0.458824, 1, 1)
+[sub_resource type="SphereMesh" id="SphereMesh_ax8k7"]
+radius = 1.0
+height = 2.0
 
-[sub_resource type="BoxMesh" id="BoxMesh_kvh4l"]
-material = SubResource("StandardMaterial3D_onx4x")
-flip_faces = true
-size = Vector3(10, 10, 10)
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_1jwwv"]
+albedo_color = Color(0.746283, 0.653058, 0.612405, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_lete5"]
+material = SubResource("StandardMaterial3D_1jwwv")
+size = Vector3(0.1, 5, 10)
 
 [node name="Field" type="Node3D"]
 script = ExtResource("1_xhoof")
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
-environment = SubResource("Environment_oiien")
+environment = SubResource("Environment_0qoor")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(-0.866023, -0.433016, 0.250001, 0, 0.499998, 0.866027, -0.500003, 0.749999, -0.43301, 0, 0, 0)
+shadow_enabled = true
 
 [node name="Water" type="MeshInstance3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.5, 0)
 layers = 2
 mesh = SubResource("PlaneMesh_db3nh")
 
-[node name="Pool" type="MeshInstance3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.97632, 0)
-visible = false
-mesh = SubResource("BoxMesh_kvh4l")
+[node name="Sphere1" type="MeshInstance3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.023321, -0.790209, -0.496889)
+mesh = SubResource("SphereMesh_ax8k7")
 
-[node name="SpotLight3D" type="SpotLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -4.37114e-08, 1, 0, -1, -4.37114e-08, 0.260317, 6.17243, -1.35331)
-light_energy = 3.877
-light_size = 0.798
-spot_range = 14.0
-spot_angle = 75.4465
+[node name="Pool" type="Node" parent="."]
+
+[node name="side1" type="MeshInstance3D" parent="Pool"]
+transform = Transform3D(1, 0, 0, 0, 0.673084, 0, 0, 0, 1, 5, -2.07477, 0)
+mesh = SubResource("BoxMesh_lete5")
+skeleton = NodePath("../..")
+
+[node name="side2" type="MeshInstance3D" parent="Pool"]
+transform = Transform3D(1, 0, 0, 0, 0.673084, 0, 0, 0, 1, -5, -2.07477, 0)
+mesh = SubResource("BoxMesh_lete5")
+skeleton = NodePath("../..")
+
+[node name="side3" type="MeshInstance3D" parent="Pool"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 0.673084, 0, -1, 0, -4.37114e-08, 0, -2.07477, -5)
+mesh = SubResource("BoxMesh_lete5")
+skeleton = NodePath("../..")
+
+[node name="side4" type="MeshInstance3D" parent="Pool"]
+transform = Transform3D(-4.37114e-08, 0, 1, 0, 0.673084, 0, -1, 0, -4.37114e-08, 0, -2.07477, 5)
+mesh = SubResource("BoxMesh_lete5")
+skeleton = NodePath("../..")
+
+[node name="side5" type="MeshInstance3D" parent="Pool"]
+transform = Transform3D(-2.51394e-08, -1.99279, 0, 0.575123, -8.71077e-08, 0, 0, 0, 1, 0, -3.22502, 0)
+mesh = SubResource("BoxMesh_lete5")
+skeleton = NodePath("../..")
+
+[node name="OmniLight3D" type="OmniLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.60158, 0)
+visible = false
+light_energy = 3.08
+omni_range = 14.2398

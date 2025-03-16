@@ -5,7 +5,6 @@
 [node name="Main" type="Node3D"]
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(0.999478, -0.0311846, 0.00845873, 0.0212704, 0.832068, 0.554266, -0.0243228, -0.553797, 0.832296, 0.198924, 3.9393, 6.89546)
+transform = Transform3D(0.85264, -0.346219, 0.391328, 0, 0.748955, 0.662621, -0.522499, -0.564977, 0.638589, 4.96405, 3.97844, 6.54279)
 
 [node name="Field" parent="." instance=ExtResource("1_rw8bp")]
-c = 1.0
