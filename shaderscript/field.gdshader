@@ -1,7 +1,6 @@
 shader_type spatial;
 uniform sampler2D refractionTexture : hint_screen_texture, filter_nearest;
 uniform sampler2D heightTexture;
-uniform sampler2D normalmap;
 uniform int numxz;
 
 varying vec2 tex_coords;
@@ -21,12 +20,19 @@ void vertex() {
     int index = z * numxz + x;
 
     // Sample height from the texture
-    vec4 data = texelFetch(heightTexture, ivec2(index, 0), 0);
-    float height = data.r;
+    float h_center = texelFetch(heightTexture, ivec2(z * numxz + x, 0), 0).r;
+	// Get height values for normal calculation
+    float h_right = texelFetch(heightTexture, ivec2(z * numxz + clamp(x+1, 0, numxz-1), 0), 0).r;
+    float h_up = texelFetch(heightTexture, ivec2(clamp(z+1, 0, numxz-1) * numxz + x, 0), 0).r;
 
-	VERTEX.y = height;
+    // Calculate surface vectors
+    vec3 right = vec3(1.0, (h_right - h_center) * 5.0, 0.0);
+    vec3 forward = vec3(0.0, (h_up - h_center) * 5.0, 1.0);
+	
+	NORMAL = normalize(cross(forward, right));
+
+	VERTEX.y = h_center;
 }
 void fragment(){
 	ALBEDO = texture(refractionTexture, SCREEN_UV).rgb * water_color;
-	//NORMAL = texture(normalmap, tex_coords).xyz;
 }

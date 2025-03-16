@@ -17,6 +17,7 @@ var sub_viewport: SubViewport
 var count: int = 0
 var time: float = 0.0
 var ball_radius: float = 0.0
+var oscillate: float = 0.0
 
 #fluid related
 var fixed_dt: float = 0.05
@@ -26,9 +27,9 @@ var acceleration: NDArray = nd.zeros(grid_size)
 var bcurr: NDArray = nd.zeros(grid_size)
 var bprev: NDArray
 var inner_elements: NDArray
-@export var c: float = 0.5
+@export var c: float = 0.9
 @export var s: float = 1.0
-@export var alpha: float = 0.1
+@export var alpha: float = 0.25
 @export var drag: float = 0.1
 
 func getInnerElements() -> void:
@@ -81,9 +82,13 @@ func ballOccupation() -> void:
 	bcurr.set(min(0.0, ball.position.y + ball_radius) - max(-1.5, ball.position.y - ball_radius), index-numz)
 
 func moveBall(delta: float) -> void:
-	time += delta
-	ball.position.x += cos(time * 2.0) * 0.05
-	ball.position.z += sin(time * 2.0) * 0.05
+	# Convert to radians at point of use
+	var angle = deg_to_rad(oscillate)
+	
+	# Increase multipliers for visible movement
+	ball.position.x += cos(angle) * 2.0 * delta
+	ball.position.z += sin(angle) * 2.0 * delta
+	ball.position.y += sin(angle) * 2.0 * delta
 
 func _ready() -> void:
 	mesh = waterBody.mesh
@@ -102,3 +107,7 @@ func _process(delta: float) -> void:
 	ballOccupation()
 	adjustHeight(fixed_dt)
 	adjustMeshHeight()
+	
+	oscillate += 90.0 * delta  # 90 degrees per second
+	if oscillate >= 360.0:
+		oscillate -= 360.0
