@@ -19,6 +19,8 @@ var time: float = 0.0
 var ball1_radius: float = 0.0
 var oscillate: float = 0.0
 var ball_control: bool = true
+@export var oscAmpl: float = 4.0
+@export var oscFreq: float = 2.0
 
 #fluid related
 var fixed_dt: float = 0.09
@@ -73,8 +75,8 @@ func ballOccupation() -> void:
 	# getting index of ball 1's position
 	var x1: int = int((ball1.position.x + 5.0) / 10.0 * float(numx - 1))
 	var z1: int = int((ball1.position.z + 5.0) / 10.0 * float(numz - 1))
-	x1 = clamp(x1, 0, numx - 1)
-	z1 = clamp(z1, 0, numz - 1)
+	x1 = clamp(x1, 0, 30 - 1)
+	z1 = clamp(z1, 0, 30 - 1)
 	var index1: int = z1 * numz + x1
 	
 	# How much of ball 1 is inside the water
@@ -89,8 +91,8 @@ func moveBalls(delta: float) -> void:
 	var angle = deg_to_rad(oscillate)
 	
 	# Increase multipliers for visible movement
-	ball1.position.x += cos(angle * 2.0) * 4.0 * delta
-	ball1.position.z += sin(angle * 2.0) * 4.0 * delta
+	ball1.position.x += cos(angle * oscFreq) * oscAmpl * delta
+	ball1.position.z += sin(angle * oscFreq) * oscAmpl * delta
 
 func _ready() -> void:
 	mesh = waterBody.mesh
