@@ -18,6 +18,7 @@ var count: int = 0
 var time: float = 0.0
 var ball1_radius: float = 0.0
 var oscillate: float = 0.0
+var ball_control: bool = true
 
 #fluid related
 var fixed_dt: float = 0.09
@@ -102,11 +103,15 @@ func _ready() -> void:
 	ball1_radius = ball1.mesh.radius
 
 func _process(delta: float) -> void:
-	moveBalls(delta)
 	ballOccupation()
 	adjustHeight(fixed_dt)
 	adjustMeshHeight()
 	
-	oscillate += 90.0 * delta  # 90 degrees per second
-	if oscillate >= 360.0:
-		oscillate -= 360.0
+	if Input.is_action_just_pressed("BallControl"):
+		ball_control = !ball_control
+		print(ball_control)
+	if ball_control:
+		moveBalls(delta)
+		oscillate += 90.0 * delta  # 90 degrees per second
+		if oscillate >= 360.0:
+			oscillate -= 360.0
