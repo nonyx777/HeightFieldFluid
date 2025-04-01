@@ -29,7 +29,7 @@ void vertex() {
     // Calculate surface vectors
     vec3 right = vec3(1.0, (h_right - h_center) * 5.0, 0.0);
     vec3 forward = vec3(0.0, (h_up - h_center) * 5.0, 1.0);
-	
+
 	NORMAL = normalize(cross(forward, right));
 
 	VERTEX.y = h_center;
