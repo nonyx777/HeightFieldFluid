@@ -126,8 +126,11 @@ func setupComputeShader() -> void:
 	inner_elements_buffer = rd.storage_buffer_create(inner_elements.to_packed_int32_array().to_byte_array().size(), inner_elements.to_packed_int32_array().to_byte_array())
 	height_buffer = rd.storage_buffer_create(height.to_packed_float32_array().to_byte_array().size(), height.to_packed_float32_array().to_byte_array())
 	acceleration_buffer = rd.storage_buffer_create(acceleration.to_packed_float32_array().to_byte_array().size(), acceleration.to_packed_float32_array().to_byte_array())
-	#var constant_data := PackedFloat32Array([c, s]).
-	#constant_buffer = rd.uniform_buffer_create(constant_data.to_byte_array().size(), constant_data.to_byte_array())
+	var constant_data := PackedByteArray()
+	constant_data.resize(16)
+	constant_data.encode_float(0, c)
+	constant_data.encode_float(4, s)
+	constant_buffer = rd.uniform_buffer_create(constant_data.size(), constant_data)
 	var inner_elements_uniform := RDUniform.new()
 	inner_elements_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	inner_elements_uniform.binding = 0
@@ -140,12 +143,12 @@ func setupComputeShader() -> void:
 	acceleration_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
 	acceleration_uniform.binding = 2
 	acceleration_uniform.add_id(acceleration_buffer)
-	#var constant_uniform := RDUniform.new()
-	#constant_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_UNIFORM_BUFFER
-	#constant_uniform.binding = 3
-	#constant_uniform.add_id(constant_buffer)
+	var constant_uniform := RDUniform.new()
+	constant_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_UNIFORM_BUFFER
+	constant_uniform.binding = 3
+	constant_uniform.add_id(constant_buffer)
 	
-	uniform_set = rd.uniform_set_create([inner_elements_uniform, height_uniform, acceleration_uniform], shader, 0)
+	uniform_set = rd.uniform_set_create([inner_elements_uniform, height_uniform, acceleration_uniform, constant_uniform], shader, 0)
 	pipeline = rd.compute_pipeline_create(shader)
 
 func _ready() -> void:

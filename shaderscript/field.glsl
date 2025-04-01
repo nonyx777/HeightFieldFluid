@@ -15,10 +15,10 @@ layout(set = 0, binding = 2, std430) restrict writeonly buffer Acceleration {
 }
 acceleration;
 
-/*layout(set = 0, binding = 3, std140) uniform Constants {
+layout(set = 0, binding = 3, std140) uniform Constants {
 	float c;
 	float s;
-};*/
+};
 
 void main(){
 	int gidx = int(gl_GlobalInvocationID.x);
