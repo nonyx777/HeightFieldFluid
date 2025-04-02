@@ -33,7 +33,7 @@ var inner_elements: NDArray
 @export var c: float = 0.0
 @export var s: float = 0.0
 @export var alpha: float = 0.15
-@export var drag: float = 0.2
+@export var drag: float = 0.1
 
 #gpu related
 var rd: RenderingDevice
@@ -44,6 +44,8 @@ var acceleration_buffer: RID
 var constant_buffer: RID
 var uniform_set: RID
 var pipeline: RID
+var compute_list
+var height_byte_size: int
 
 func getInnerElements() -> void:
 	var full_matrix: NDArray = nd.linspace(0, grid_size - 1, grid_size)
@@ -158,14 +160,15 @@ func _ready() -> void:
 	getInnerElements()
 	image = Image.create(grid_size, 1, false, Image.FORMAT_RGBAF)
 	s = waterBody.mesh.get_aabb().size[0] / numz # Make sure that width and depth are equal, and also numx and numz are equal as well
-	c = 0.5
+	c = 0.35
 	ball1_radius = ball1.mesh.radius
 	
+	height_byte_size = height.to_packed_float32_array().to_byte_array().size()
 	setupComputeShader()
 
 func _process(delta: float) -> void:
-	rd.buffer_update(height_buffer, 0, height.to_packed_float32_array().to_byte_array().size(), height.to_packed_float32_array().to_byte_array())
-	var compute_list = rd.compute_list_begin()
+	rd.buffer_update(height_buffer, 0, height_byte_size, height.to_packed_float32_array().to_byte_array())
+	compute_list = rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_set, 0)
 	rd.compute_list_dispatch(compute_list, ceil(inner_elements.size() / 64), 1, 1)

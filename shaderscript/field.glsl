@@ -32,5 +32,5 @@ void main(){
 	float v_right = height.data[index+64];
 	float v_left = height.data[index-64];
 
-	acceleration.data[index] = (0.5 * 0.5)/(0.15625 * 0.15625) * (v_up + v_down + v_right + v_left - 4.0 * v_center);
+	acceleration.data[index] = (c * c)/(s * s) * (v_up + v_down + v_right + v_left - 4.0 * v_center);
 }
